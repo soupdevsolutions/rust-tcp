@@ -16,15 +16,14 @@ impl Client {
         let stream = TcpStream::connect(address).await?;
 
         Ok(Self {
-            server_host: host,
+            server_host: host.into(),
             server_port: port,
             stream,
         })
     }
 
     pub async fn send_message(&mut self, message: Message) -> anyhow::Result<()> {
-        let message = message.encode();
-        self.stream.write_all(&message).await?;
+        self.stream.write_all(&message.encode()).await?;
         Ok(())
     }
 }

@@ -9,7 +9,18 @@ impl MessageReader {
         Self { buffer: Vec::new() }
     }
 
-    pub fn can_parse(&self) -> bool {
+    pub fn read(&mut self, data: &[u8]) -> anyhow::Result<Vec<Message>> {
+        self.buffer.extend_from_slice(data);
+        let mut data = vec![];
+        while self.can_parse() {
+            let message = self.parse_first()?;
+            data.push(message);
+        }
+
+        Ok(data)
+    }
+
+    fn can_parse(&self) -> bool {
         if self.buffer.len() < METADATA_SIZE {
             return false;
         }
@@ -17,17 +28,7 @@ impl MessageReader {
         self.buffer.len() >= METADATA_SIZE + length as usize
     }
 
-    pub fn read(&mut self, data: &[u8]) -> Option<Message> {
-        self.buffer.extend_from_slice(data);
-        if self.can_parse() {
-            let message = self.flush().ok()?;
-            return Some(message);
-        }
-
-        None
-    }
-
-    pub fn flush(&mut self) -> anyhow::Result<Message> {
+    fn parse_first(&mut self) -> anyhow::Result<Message> {
         let length = u16::from_be_bytes([self.buffer[1], self.buffer[2]]);
         let message_length = METADATA_SIZE + length as usize;
         let message = self.buffer[..message_length].to_vec();

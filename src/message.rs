@@ -1,4 +1,4 @@
-use crate::constants::PROTOCOL_VERSION;
+use crate::constants::{METADATA_SIZE, PROTOCOL_VERSION};
 
 #[derive(Debug, Clone)]
 pub struct Message {
@@ -8,16 +8,16 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn new(content: impl Into<String>) -> anyhow::Result<Self> {
+    pub fn new(content: impl Into<String>) -> Self {
         let content = content.into();
         let length = content.len() as u16;
         let version = PROTOCOL_VERSION;
 
-        Ok(Self {
+        Self {
             version,
             length,
             content,
-        })
+        }
     }
 
     pub fn encode(&self) -> Vec<u8> {
@@ -30,6 +30,10 @@ impl Message {
     }
 
     pub fn decode(buffer: &[u8]) -> anyhow::Result<Self> {
+        if buffer.len() < METADATA_SIZE {
+            return Err(anyhow::anyhow!("Invalid message length"));
+        }
+
         let version = buffer[0];
         if version != PROTOCOL_VERSION {
             return Err(anyhow::anyhow!("Invalid protocol version"));

@@ -3,22 +3,18 @@ name = "rust-tcp"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 name = "rust_tcp"
 path = "src/lib.rs"
 
 [[bin]]
 name = "server"
-path = "src/server_main.rs"
+path = "src/bins/server.rs"
 
 [[bin]]
 name = "client"
-path = "src/client_main.rs"
+path = "src/bins/client.rs"
 
 [dependencies]
 anyhow = "1.0.83"
-futures = "0.3.30"
 tokio = { version = "1.37.0", features = ["full"] }
-tokio-util = { version = "0.7.11", features = ["codec"] }
